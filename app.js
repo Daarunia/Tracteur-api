@@ -6,9 +6,10 @@ var mongoose = require('mongoose');
 var cors = require('cors');
 
 var tracteurRouter = require('./routes/tracteur');
+var marqueRouter = require('./routes/marque');
+
 
 var app = express();
-// Intégration de la bdd
 var connectionString = "mongodb+srv://Darunia:100902@darunia.mf9cjcm.mongodb.net/test";
 var mongoDB = process.env.MONGODB_URI || connectionString;
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -24,6 +25,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors());
 app.use('/tracteurs', tracteurRouter);
+app.use('/marques', marqueRouter);
+
 
 
 module.exports = app;

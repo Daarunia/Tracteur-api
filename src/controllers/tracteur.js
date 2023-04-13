@@ -1,10 +1,7 @@
-// Import du modèle tracteur
 var Tracteur = require("../models/tracteurs");
 
-// Import de express-validator
 const { param, body, validationResult } = require("express-validator");
 
-// Déterminer les règles de validation de la requête
 const tracteurValidationRules = () => {
     return [   
         body("model")
@@ -61,7 +58,6 @@ const bodyIdValidationRule = () => {
     ]
 };
 
-// Méthode de vérification de la conformité de la requête  
 const checkValidity = (req, res, next) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
@@ -75,10 +71,7 @@ const checkValidity = (req, res, next) => {
     })
 }
 
-// Create
 exports.create = [bodyIdValidationRule(), tracteurValidationRules(), checkValidity, (req, res, next) => {
-    
-    // Création de la nouvelle instance de tracteur à ajouter 
     var tracteur = new Tracteur({
         _id: req.body.id,
         model: req.body.model,
@@ -86,9 +79,9 @@ exports.create = [bodyIdValidationRule(), tracteurValidationRules(), checkValidi
         liftingCapacity: req.body.liftingCapacity,
         weight: req.body.weight,
         releaseDate: req.body.releaseDate,
-      });
+        marque: req.body.marque,
+    });
 
-    // Ajout de tracteur dans la bdd 
     tracteur.save(function (err) {
         if (err) {
           return res.status(500).json(err);
@@ -97,29 +90,29 @@ exports.create = [bodyIdValidationRule(), tracteurValidationRules(), checkValidi
     });
 }];
 
-// Read
 exports.getAll = (req, res, next) => {
-    Tracteur.find(function (err, result) {
-      if (err) {
-        return res.status(500).json(err);
-      }
-      return res.status(200).json(result);
-    });
+    Tracteur.find() 
+        .populate("marque")
+        .exec(function (err, result){
+            if (err) {
+                return res.status(500).json(err);
+            } 
+                return res.status(200).json(result);
+        });
 };
 
 exports.getById = [paramIdValidationRule(), checkValidity, (req, res, next) => {
-    Tracteur.findById(req.params.id).exec(function (err, result) {
-        if (err) {
-          return res.status(500).json(err);
-        }
-        return res.status(200).json(result);
-    });
+    Tracteur.findById(req.params.id)
+        .populate("marque")
+        .exec(function (err, result) {
+            if (err) {
+            return res.status(500).json(err);
+            }
+            return res.status(200).json(result);
+        });
 }];
 
-// Update
 exports.update = [paramIdValidationRule(), tracteurValidationRules(), checkValidity,(req, res, next) => {
-    
-    // Création de la nouvelle instance de tracteur à modifier 
     var tracteur = new Tracteur({
         _id: req.body.id,
         model: req.body.model,
@@ -127,6 +120,7 @@ exports.update = [paramIdValidationRule(), tracteurValidationRules(), checkValid
         liftingCapacity: req.body.liftingCapacity,
         weight: req.body.weight,
         releaseDate: req.body.releaseDate,
+        marque: req.body.marque,
       });
 
       Tracteur.findByIdAndUpdate(req.params.id, tracteur, function (err, result) {
@@ -140,8 +134,10 @@ exports.update = [paramIdValidationRule(), tracteurValidationRules(), checkValid
       });
 }];
 
-// Delete
-exports.delete = [paramIdValidationRule(), checkValidity,(req, res, next) => {
+exports.delete = [
+    paramIdValidationRule(),
+    checkValidity,
+    (req, res, next) => {
     Tracteur.findByIdAndRemove(req.params.id).exec(function (err, result) {
         if (err) {
           return res.status(500).json(err);
